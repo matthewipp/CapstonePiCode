@@ -14,7 +14,7 @@
 #include <opencv2/opencv.hpp>
 #include "PieceRecognition.h"
 
-int main(int argc, char** argv) {
+int testClusterizing(int argc, char** argv) {
     // Check arguments
     if(argc != 2) {
         std::cout << "Must use exactly 1 argument, the file path\n";
@@ -56,4 +56,69 @@ int main(int argc, char** argv) {
     std::cout << redClusters.size() << " red clusters\n";
 
     return 0;
+}
+
+int testBoardAligner(int argc, char** argv) {
+    // Check arguments
+    if(argc != 2) {
+        std::cout << "Must use exactly 1 argument, the file path\n";
+        return 0;
+    }
+    // Read image
+    std::string filename = argv[1];
+    cv::Mat img = cv::imread(filename);
+    if(img.empty()) {
+        std::cout << "Could not read file: " << filename << "\n"; 
+        return 0;
+    }
+    // Align board
+    ImageState boardState;
+    boardState.alignCamera(img);
+    return 0;
+}
+
+int testBoardString(int argc, char** argv) {
+    // Check arguments
+    if(argc != 3) {
+        std::cout << "Must use exactly 2 arguments, the align file path and the image file path\n";
+        return 0;
+    }
+    // Read images
+    std::string alignFilename = argv[1];
+    std::string stateFilename = argv[2];
+    cv::Mat alignImg = cv::imread(alignFilename);
+    if(alignImg.empty()) {
+        std::cout << "Could not read file: " << alignFilename << "\n"; 
+        return 0;
+    }
+    cv::Mat stateImg = cv::imread(stateFilename);
+    if(stateImg.empty()) {
+        std::cout << "Could not read file: " << stateFilename << "\n"; 
+        return 0;
+    }
+    // Align board
+    ImageState boardState;
+    boardState.alignCamera(alignImg);
+    // Get board state
+    bool yay = boardState.generateBoardstate(stateImg);
+    if(yay) {
+        std::cout << "Successfully imaged board: \n";
+        std::cout << boardState.boardState << "\n";
+    }
+    else {
+        std::cout << "Detected inavlid board\n";
+    }
+    std::cout << "Board left and right side: " << boardState.edgeX[0] << ", " << boardState.edgeX[1] << "\n";
+    std::cout << "Board top and bottom side: " << boardState.edgeY[0] << ", " << boardState.edgeY[1] << "\n";
+    std::cout << "Average Square Size (widthxheight): " << boardState.avgSquareWidth << " x ";
+    std::cout << boardState.avgSquareHeight << "\n";
+    std::cout << "Red Pieces: " << boardState.redPiecesOnBoard.size() << "\n";
+    std::cout << "Blue Pieces: " << boardState.bluePiecesOnBoard.size() << "\n";
+    return 0;
+}
+
+int main(int argc, char** argv) {
+    //return testBoardAligner(argc, argv);
+    //return testClusterizing(argc, argv);
+    return testBoardString(argc, argv);
 }
